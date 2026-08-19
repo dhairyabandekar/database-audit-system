@@ -73,9 +73,9 @@ function App() {
       };
 
       const response = await axios.patch(
-  `${API_URL}/api/tables/${table._id}`,
-  updatedData
-);
+        `${API_URL}/api/tables/${table._id}`,
+        updatedData
+      );
 
       setTables((prevTables) =>
         prevTables.map((item) =>
@@ -120,16 +120,6 @@ function App() {
       alert("Failed to delete table");
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-gray-500">
-        <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin mb-3"></div>
-
-        <p>Loading audit records...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -211,137 +201,160 @@ function App() {
               </thead>
 
               <tbody className="divide-y divide-gray-100">
-                {tables.map((table) => {
-                  const originalTable = originalTables.find(
-                    (item) => item._id === table._id
-                  );
+                {loading ? (
+                  <tr>
+                    <td colSpan="7" className="px-5 py-16 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin mb-3"></div>
 
-                  const actions = getActions(
-                    originalTable,
-                    table
-                  );
-
-                  return (
-                    <tr
-                      key={table._id}
-                      className="hover:bg-gray-50 transition-colors"
+                        <p className="text-sm text-gray-500">
+                          Loading audit records...
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : tables.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan="7"
+                      className="px-5 py-16 text-center text-sm text-gray-500"
                     >
-                      {/* DB Name */}
-                      <td className="px-5 py-4">
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs font-semibold">
-                          {table.dbName}
-                        </span>
-                      </td>
+                      No audit records found.
+                    </td>
+                  </tr>
+                ) : (
+                  tables.map((table) => {
+                    const originalTable = originalTables.find(
+                      (item) => item._id === table._id
+                    );
 
-                      {/* Table Name */}
-                      <td className="px-5 py-4 text-sm font-semibold text-gray-800">
-                        {table.tableName}
-                      </td>
+                    const actions = getActions(
+                      originalTable,
+                      table
+                    );
 
-                      {/* Renamed To */}
-                      <td className="px-5 py-4">
-                        <input
-                          type="text"
-                          value={table.tableRenamedTo}
-                          placeholder="New table name"
-                          onChange={(e) =>
-                            handleChange(
-                              table._id,
-                              "tableRenamedTo",
-                              e.target.value
-                            )
-                          }
-                          className="w-full min-w-[160px] px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                        />
-                      </td>
+                    return (
+                      <tr
+                        key={table._id}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        {/* DB Name */}
+                        <td className="px-5 py-4">
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs font-semibold">
+                            {table.dbName}
+                          </span>
+                        </td>
 
-                      {/* Purpose */}
-                      <td className="px-5 py-4">
-                        <input
-                          type="text"
-                          value={table.purpose}
-                          placeholder="Table purpose"
-                          onChange={(e) =>
-                            handleChange(
-                              table._id,
-                              "purpose",
-                              e.target.value
-                            )
-                          }
-                          className="w-full min-w-[200px] px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                        />
-                      </td>
+                        {/* Table Name */}
+                        <td className="px-5 py-4 text-sm font-semibold text-gray-800">
+                          {table.tableName}
+                        </td>
 
-                      {/* Status */}
-                      <td className="px-5 py-4">
-                        <select
-                          value={table.status}
-                          onChange={(e) =>
-                            handleChange(
-                              table._id,
-                              "status",
-                              e.target.value
-                            )
-                          }
-                          className={`px-3 py-2 text-sm font-medium border rounded-lg outline-none ${
-                            table.status === "active"
-                              ? "bg-green-50 text-green-700 border-green-200"
-                              : "bg-red-50 text-red-700 border-red-200"
-                          }`}
-                        >
-                          <option value="active">
-                            Active
-                          </option>
-
-                          <option value="inactive">
-                            Inactive
-                          </option>
-                        </select>
-                      </td>
-
-                      {/* Action */}
-                      <td className="px-5 py-4">
-                        <div className="flex flex-wrap gap-2">
-                          {actions.length > 0 ? (
-                            actions.map((action) => (
-                              <span
-                                key={action}
-                                className="px-2.5 py-1 rounded-md bg-orange-50 text-orange-700 text-xs font-semibold"
-                              >
-                                {action}
-                              </span>
-                            ))
-                          ) : (
-                            <span className="text-xs text-gray-400">
-                              No changes
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Buttons */}
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleSave(table)}
-                            className="px-3 py-2 rounded-lg bg-gray-900 text-white text-xs font-semibold hover:bg-gray-700 transition"
-                          >
-                            Save
-                          </button>
-
-                          <button
-                            onClick={() =>
-                              handleDelete(table._id)
+                        {/* Renamed To */}
+                        <td className="px-5 py-4">
+                          <input
+                            type="text"
+                            value={table.tableRenamedTo}
+                            placeholder="New table name"
+                            onChange={(e) =>
+                              handleChange(
+                                table._id,
+                                "tableRenamedTo",
+                                e.target.value
+                              )
                             }
-                            className="px-3 py-2 rounded-lg bg-red-50 text-red-600 text-xs font-semibold hover:bg-red-100 transition"
+                            className="w-full min-w-[160px] px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                          />
+                        </td>
+
+                        {/* Purpose */}
+                        <td className="px-5 py-4">
+                          <input
+                            type="text"
+                            value={table.purpose}
+                            placeholder="Table purpose"
+                            onChange={(e) =>
+                              handleChange(
+                                table._id,
+                                "purpose",
+                                e.target.value
+                              )
+                            }
+                            className="w-full min-w-[200px] px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                          />
+                        </td>
+
+                        {/* Status */}
+                        <td className="px-5 py-4">
+                          <select
+                            value={table.status}
+                            onChange={(e) =>
+                              handleChange(
+                                table._id,
+                                "status",
+                                e.target.value
+                              )
+                            }
+                            className={`px-3 py-2 text-sm font-medium border rounded-lg outline-none ${
+                              table.status === "active"
+                                ? "bg-green-50 text-green-700 border-green-200"
+                                : "bg-red-50 text-red-700 border-red-200"
+                            }`}
                           >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                            <option value="active">
+                              Active
+                            </option>
+
+                            <option value="inactive">
+                              Inactive
+                            </option>
+                          </select>
+                        </td>
+
+                        {/* Action */}
+                        <td className="px-5 py-4">
+                          <div className="flex flex-wrap gap-2">
+                            {actions.length > 0 ? (
+                              actions.map((action) => (
+                                <span
+                                  key={action}
+                                  className="px-2.5 py-1 rounded-md bg-orange-50 text-orange-700 text-xs font-semibold"
+                                >
+                                  {action}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-xs text-gray-400">
+                                No changes
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Buttons */}
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleSave(table)}
+                              className="px-3 py-2 rounded-lg bg-gray-900 text-white text-xs font-semibold hover:bg-gray-700 transition"
+                            >
+                              Save
+                            </button>
+
+                            <button
+                              onClick={() =>
+                                handleDelete(table._id)
+                              }
+                              className="px-3 py-2 rounded-lg bg-red-50 text-red-600 text-xs font-semibold hover:bg-red-100 transition"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
