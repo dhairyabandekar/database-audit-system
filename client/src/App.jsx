@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 function App() {
   const [tables, setTables] = useState([]);
@@ -29,9 +30,9 @@ function App() {
       prevTables.map((table) =>
         table._id === id
           ? {
-              ...table,
-              [field]: value,
-            }
+            ...table,
+            [field]: value,
+          }
           : table
       )
     );
@@ -89,19 +90,41 @@ function App() {
         )
       );
 
-      alert("Changes saved successfully");
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "success",
+        title: "Changes saved successfully",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+      });
     } catch (error) {
       console.error("Error saving table:", error);
-      alert("Failed to save changes");
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "error",
+        title: "Unable to save the changes. Please try again.",
+        timer: 2000,
+        timerProgressBar: true,
+      });
     }
   };
 
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this table?"
-    );
+    const result = await Swal.fire({
+      title: "Delete Table?",
+      text: "This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, delete it",
+      cancelButtonText: "Cancel",
+    });
 
-    if (!confirmDelete) return;
+    if (!result.isConfirmed) return;
 
     try {
       await axios.delete(`${API_URL}/api/tables/${id}`);
@@ -114,10 +137,20 @@ function App() {
         prevTables.filter((table) => table._id !== id)
       );
 
-      alert("Table deleted successfully");
+      Swal.fire({
+        icon: "success",
+        title: "Deleted",
+        text: "Table has been deleted successfully.",
+        confirmButtonColor: "#111827",
+      });
     } catch (error) {
       console.error("Error deleting table:", error);
-      alert("Failed to delete table");
+      Swal.fire({
+        icon: "error",
+        title: "Delete Failed",
+        text: "Unable to delete the table. Please try again.",
+        confirmButtonColor: "#111827",
+      });
     }
   };
 
@@ -295,11 +328,10 @@ function App() {
                                 e.target.value
                               )
                             }
-                            className={`px-3 py-2 text-sm font-medium border rounded-lg outline-none ${
-                              table.status === "active"
-                                ? "bg-green-50 text-green-700 border-green-200"
-                                : "bg-red-50 text-red-700 border-red-200"
-                            }`}
+                            className={`px-3 py-2 text-sm font-medium border rounded-lg outline-none ${table.status === "active"
+                              ? "bg-green-50 text-green-700 border-green-200"
+                              : "bg-red-50 text-red-700 border-red-200"
+                              }`}
                           >
                             <option value="active">
                               Active
