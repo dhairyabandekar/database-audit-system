@@ -5,10 +5,11 @@ function App() {
   const [tables, setTables] = useState([]);
   const [loading, setLoading] = useState(true);
   const [originalTables, setOriginalTables] = useState([]);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const fetchTables = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/tables");
+      const response = await axios.get(`${API_URL}/api/tables`);
 
       setTables(response.data);
       setOriginalTables(response.data);
@@ -72,9 +73,9 @@ function App() {
       };
 
       const response = await axios.patch(
-        `http://localhost:5000/api/tables/${table._id}`,
-        updatedData
-      );
+  `${API_URL}/api/tables/${table._id}`,
+  updatedData
+);
 
       setTables((prevTables) =>
         prevTables.map((item) =>
@@ -103,7 +104,7 @@ function App() {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/tables/${id}`);
+      await axios.delete(`${API_URL}/api/tables/${id}`);
 
       setTables((prevTables) =>
         prevTables.filter((table) => table._id !== id)
